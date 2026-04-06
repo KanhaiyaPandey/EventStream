@@ -3,15 +3,16 @@ import { createServer } from "http";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
-import rateLimit from "express-rate-limit";
 
 import { env } from "./config/env";
 import { connectDatabase } from "./config/database";
 import { initSocketServer } from "./services/socketService";
+import { initQueueSubscriber, closeQueueSubscriber } from "./services/queueSubscriberService";
 import { trackRouter } from "./routes/track";
 import { eventsRouter } from "./routes/events";
 import { analyticsRouter } from "./routes/analytics";
 import { errorHandler } from "./middleware/errorHandler";
+import { createRateLimiter } from "./middleware/rateLimiter";
 
 // ─── App Setup ────────────────────────────────────────────────────────────────
 
@@ -39,22 +40,8 @@ if (env.isDev) {
 
 // ─── Rate Limiting ────────────────────────────────────────────────────────────
 
-// Strict limit on the ingestion endpoint to prevent abuse
-const trackLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 500,            // 500 events per minute per IP
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { success: false, error: "Too many requests, please slow down." },
-});
-
-// General API limit
-const apiLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 200,
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+const trackLimiter = createRateLimiter();
+const apiLimiter = createRateLimiter();
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 
@@ -84,6 +71,9 @@ async function bootstrap(): Promise<void> {
   // Attach Socket.io to the HTTP server
   initSocketServer(httpServer);
 
+  // Subscribe to worker events (for websocket broadcasts)
+  await initQueueSubscriber();
+
   // Start listening
   httpServer.listen(env.PORT, () => {
     console.info(`\n🚀 EventStream API running on http://localhost:${env.PORT}`);
@@ -96,5 +86,13 @@ bootstrap().catch((err) => {
   console.error("Fatal startup error:", err);
   process.exit(1);
 });
+
+async function shutdown(): Promise<void> {
+  await closeQueueSubscriber();
+  process.exit(0);
+}
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
 
 export { app, httpServer };

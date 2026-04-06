@@ -1,9 +1,8 @@
-import { Router, Request, Response } from "express";
+import { Router } from "express";
 import { z } from "zod";
 import { validate } from "../middleware/validate";
 import { asyncHandler } from "../middleware/errorHandler";
-import { eventService } from "../services/eventService";
-import { broadcastNewEvent, broadcastAnalytics } from "../services/socketService";
+import { trackEvent } from "../controllers/trackController";
 
 const router = Router();
 
@@ -29,28 +28,7 @@ const trackSchema = z.object({
 router.post(
   "/",
   validate(trackSchema),
-  asyncHandler(async (req: Request, res: Response) => {
-    const ip =
-      (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ??
-      req.socket.remoteAddress ??
-      "unknown";
-
-    const userAgent = req.headers["user-agent"] ?? "";
-
-    // Persist the event
-    const event = await eventService.track(req.body, { ip, userAgent });
-
-    // Real-time broadcast to dashboard clients (non-blocking)
-    broadcastNewEvent(event);
-
-    // Update analytics summary in real-time (fire-and-forget)
-    eventService.getSummary().then(broadcastAnalytics).catch(() => {});
-
-    res.status(201).json({
-      success: true,
-      data: { eventId: event._id, eventType: event.eventType, timestamp: event.timestamp },
-    });
-  })
+  asyncHandler(trackEvent)
 );
 
 export { router as trackRouter };

@@ -208,4 +208,57 @@ export const eventService = {
       })),
     };
   },
+
+  async query(opts: {
+    eventType?: string;
+    from: Date;
+    to: Date;
+  }): Promise<{
+    count: number;
+    groupedByEventType: Array<{ eventType: string; count: number }>;
+    groupedByHour: Array<{ hour: string; count: number }>;
+    from: string;
+    to: string;
+  }> {
+    const match: Record<string, unknown> = {
+      timestamp: { $gte: opts.from, $lte: opts.to },
+    };
+    if (opts.eventType) match.eventType = opts.eventType;
+
+    const [count, groupedByEventType, groupedByHour] = await Promise.all([
+      Event.countDocuments(match),
+      Event.aggregate([
+        { $match: match },
+        { $group: { _id: "$eventType", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 100 },
+      ]),
+      Event.aggregate([
+        { $match: match },
+        {
+          $group: {
+            _id: {
+              $dateToString: { format: "%Y-%m-%dT%H:00:00Z", date: "$timestamp" },
+            },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]),
+    ]);
+
+    return {
+      count,
+      groupedByEventType: groupedByEventType.map((x) => ({
+        eventType: x._id as string,
+        count: x.count as number,
+      })),
+      groupedByHour: groupedByHour.map((x) => ({
+        hour: x._id as string,
+        count: x.count as number,
+      })),
+      from: opts.from.toISOString(),
+      to: opts.to.toISOString(),
+    };
+  },
 };

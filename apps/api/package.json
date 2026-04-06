@@ -4,13 +4,16 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "worker:dev": "tsx watch src/workers/eventWorker.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
+    "worker": "node dist/workers/eventWorker.js",
     "type-check": "tsc --noEmit",
     "lint": "eslint src --ext .ts",
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "bullmq": "^5.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
@@ -19,7 +22,8 @@
     "zod": "^3.23.8",
     "morgan": "^1.10.0",
     "helmet": "^7.1.0",
-    "express-rate-limit": "^7.3.1"
+    "express-rate-limit": "^7.3.1",
+    "ioredis": "^5.0.0"
   },
   "devDependencies": {
     "@eventstream/config": "*",

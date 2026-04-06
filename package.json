@@ -6,6 +6,10 @@
     "apps/*",
     "packages/*"
   ],
+  "dependencies": {
+    "bullmq": "^5.73.0",
+    "ioredis": "^5.10.1"
+  },
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
