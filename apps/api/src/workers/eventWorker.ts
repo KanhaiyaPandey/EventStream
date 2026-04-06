@@ -14,6 +14,9 @@ async function bootstrap(): Promise<void> {
   const redis = createRedisClient();
   const publisher = createRedisClient();
 
+  redis.on("error", (err) => console.error("[Worker][Redis] Error:", err));
+  publisher.on("error", (err) => console.error("[Worker][Redis] Publish error:", err));
+
   const alertService = new AlertService({
     redis,
     cooldownSeconds: env.ALERT_COOLDOWN_SECONDS,
@@ -29,6 +32,7 @@ async function bootstrap(): Promise<void> {
   const worker = new Worker<EventIngestJob>(
     EVENT_QUEUE_NAME,
     async (job) => {
+      console.info(`[Worker] Processing job: ${job.id ?? "unknown"}`);
       const event = await eventService.track(job.data.payload as never, job.data.requestMeta);
 
       const anomaly = await anomalyService.recordAndDetect({ eventType: event.eventType });

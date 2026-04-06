@@ -21,6 +21,7 @@ export async function initQueueSubscriber(): Promise<void> {
   });
 
   await subscriber.subscribe(QUEUE_CHANNELS.EVENT_INGESTED);
+  console.info(`[Redis] Subscribed: ${QUEUE_CHANNELS.EVENT_INGESTED}`);
 
   subscriber.on("message", (channel, message) => {
     if (channel !== QUEUE_CHANNELS.EVENT_INGESTED) return;
@@ -29,6 +30,7 @@ export async function initQueueSubscriber(): Promise<void> {
       const parsed = JSON.parse(message) as IngestedMessage;
       if (!parsed?.event) return;
 
+      console.info("[Redis] Event ingested message received");
       broadcastNewEvent(parsed.event as never);
 
       eventService
@@ -46,4 +48,3 @@ export async function closeQueueSubscriber(): Promise<void> {
   await subscriber.quit();
   subscriber = null;
 }
-

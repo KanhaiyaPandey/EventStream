@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "node scripts/dev.js",
+    "dev:api": "tsx watch src/index.ts",
+    "dev:worker": "tsx watch src/workers/eventWorker.ts",
     "worker:dev": "tsx watch src/workers/eventWorker.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",

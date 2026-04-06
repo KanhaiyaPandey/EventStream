@@ -9,6 +9,7 @@ const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
+    cache: "no-store",
     headers: { "Content-Type": "application/json" },
     ...init,
   });
@@ -56,7 +57,7 @@ export const api = {
     return apiFetch(`/api/events?${params}`);
   },
 
-  trackEvent(payload: TrackEventPayload): Promise<{ eventId: string }> {
+  trackEvent(payload: TrackEventPayload): Promise<{ jobId: string | number }> {
     return apiFetch("/api/track", {
       method: "POST",
       body: JSON.stringify(payload),

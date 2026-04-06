@@ -19,6 +19,15 @@ import { createRateLimiter } from "./middleware/rateLimiter";
 const app = express();
 const httpServer = createServer(app);
 
+// APIs should not be cached by browsers (prevents 304 + stale dashboards)
+app.set("etag", false);
+app.use((_req, res, next) => {
+  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  next();
+});
+
 // ─── Security & Logging Middleware ────────────────────────────────────────────
 
 app.use(helmet());
@@ -26,7 +35,7 @@ app.use(
   cors({
     origin: env.CORS_ORIGIN,
     methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cache-Control"],
   })
 );
 app.use(express.json({ limit: "1mb" }));

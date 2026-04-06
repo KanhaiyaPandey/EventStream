@@ -33,7 +33,7 @@ export function EventSender() {
         userId: current.userId,
         properties: current.properties,
       });
-      setLastSent(res.eventId);
+      setLastSent(String(res.jobId));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to send");
     } finally {
