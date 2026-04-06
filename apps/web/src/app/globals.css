@@ -1,0 +1,51 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #f8f9fb;
+  --surface: #ffffff;
+  --border: #e4e4e7;
+  --brand: #4361ee;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: "Inter", sans-serif;
+  background-color: var(--bg);
+  color: #09090b;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: #f4f4f5; }
+::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 4px; }
+
+/* Live feed new-event flash */
+@keyframes flashIn {
+  0%   { background-color: rgba(67,97,238,0.08); }
+  100% { background-color: transparent; }
+}
+.flash-new { animation: flashIn 1.2s ease-out forwards; }
+
+/* Shimmer skeleton */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, #f4f4f5 25%, #fafafa 50%, #f4f4f5 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+}
+
+@layer utilities {
+  .animation-delay-100 { animation-delay: 100ms; }
+  .animation-delay-200 { animation-delay: 200ms; }
+  .animation-delay-300 { animation-delay: 300ms; }
+}

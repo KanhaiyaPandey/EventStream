@@ -1,0 +1,15 @@
+{
+  "name": "@eventstream/config",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    "./tsconfig": "./tsconfig.base.json",
+    "./tsconfig-next": "./tsconfig.next.json",
+    "./eslint": "./eslint.base.js",
+    "./tailwind": "./tailwind.base.js",
+    "./types": "./src/types.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}

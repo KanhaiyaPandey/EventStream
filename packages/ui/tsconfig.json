@@ -1,0 +1,10 @@
+{
+  "extends": "@eventstream/config/tsconfig-next",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "paths": {
+      "@eventstream/config/*": ["../../packages/config/src/*"]
+    }
+  },
+  "include": ["src"]
+}

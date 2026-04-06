@@ -1,0 +1,24 @@
+{
+  "name": "@eventstream/ui",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx"
+  },
+  "peerDependencies": {
+    "react": "^18",
+    "react-dom": "^18"
+  },
+  "devDependencies": {
+    "@eventstream/config": "*",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "typescript": "^5.4.5"
+  }
+}
