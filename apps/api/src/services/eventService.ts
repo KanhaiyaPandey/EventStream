@@ -58,6 +58,7 @@ export const eventService = {
     const { browser, os, device } = parseUserAgent(requestMeta.userAgent);
 
     const event = await Event.create({
+      eventId: payload.eventId,
       eventType: payload.eventType,
       userId: payload.userId ?? "anonymous",
       sessionId: payload.sessionId,

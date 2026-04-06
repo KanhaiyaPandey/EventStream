@@ -4,6 +4,7 @@ import mongoose, { Document, Schema, Types } from "mongoose";
 
 export interface IEvent extends Document {
   _id: Types.ObjectId;
+  eventId: string;
   eventType: string;
   userId: string;
   sessionId: string;
@@ -24,6 +25,14 @@ export interface IEvent extends Document {
 
 const EventSchema = new Schema<IEvent>(
   {
+    eventId: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 200,
+      unique: true,
+      index: true,
+    },
     eventType: {
       type: String,
       required: true,
@@ -65,6 +74,9 @@ const EventSchema = new Schema<IEvent>(
 );
 
 // ─── Indexes (performance-critical) ──────────────────────────────────────────
+
+// Strong idempotency key
+EventSchema.index({ eventId: 1 }, { unique: true });
 
 // Most common query: recent events of a specific type
 EventSchema.index({ eventType: 1, timestamp: -1 });

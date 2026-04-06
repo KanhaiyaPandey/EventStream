@@ -11,6 +11,8 @@ import { initQueueSubscriber, closeQueueSubscriber } from "./services/queueSubsc
 import { trackRouter } from "./routes/track";
 import { eventsRouter } from "./routes/events";
 import { analyticsRouter } from "./routes/analytics";
+import { metricsRouter } from "./routes/metrics";
+import { alertsRouter } from "./routes/alerts";
 import { errorHandler } from "./middleware/errorHandler";
 import { createRateLimiter } from "./middleware/rateLimiter";
 
@@ -57,6 +59,8 @@ const apiLimiter = createRateLimiter();
 app.use("/api/track", trackLimiter, trackRouter);
 app.use("/api/events", apiLimiter, eventsRouter);
 app.use("/api/analytics", apiLimiter, analyticsRouter);
+app.use("/api/metrics", apiLimiter, metricsRouter);
+app.use("/api/alerts", apiLimiter, alertsRouter);
 
 // Health check at root
 app.get("/", (_req, res) => {

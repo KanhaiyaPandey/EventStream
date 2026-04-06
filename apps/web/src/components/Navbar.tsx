@@ -3,22 +3,40 @@
 import { Activity } from "lucide-react";
 import { LiveDot } from "@eventstream/ui";
 import { useDashboardStore } from "@/store/dashboardStore";
+import Link from "next/link";
 
 export function Navbar() {
   const wsConnected = useDashboardStore((s) => s.wsConnected);
   const summary = useDashboardStore((s) => s.summary);
+  const alertsCount = useDashboardStore((s) => s.alerts.length);
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-zinc-200 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
-            <Activity className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-display font-700 text-zinc-900 text-lg tracking-tight">
-            Event<span className="text-blue-600">Stream</span>
-          </span>
+        <div className="flex items-center gap-6">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+              <Activity className="w-4 h-4 text-white" />
+            </div>
+            <span className="font-display font-700 text-zinc-900 text-lg tracking-tight">
+              Event<span className="text-blue-600">Stream</span>
+            </span>
+          </Link>
+
+          <nav className="hidden sm:flex items-center gap-3 text-sm">
+            <Link href="/" className="text-zinc-600 hover:text-zinc-900 transition-colors">
+              Dashboard
+            </Link>
+            <Link href="/alerts" className="text-zinc-600 hover:text-zinc-900 transition-colors">
+              Alerts
+              {alertsCount > 0 && (
+                <span className="ml-2 inline-flex items-center justify-center text-[10px] font-mono px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200">
+                  {alertsCount > 99 ? "99+" : alertsCount}
+                </span>
+              )}
+            </Link>
+          </nav>
         </div>
 
         {/* Right side */}

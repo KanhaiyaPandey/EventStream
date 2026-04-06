@@ -42,6 +42,7 @@ export interface DeviceInfo {
 // ─── API Payloads ─────────────────────────────────────────────────────────────
 
 export interface TrackEventPayload {
+  eventId: string;
   eventType: EventType | string;
   userId?: string;
   sessionId?: string;
@@ -51,6 +52,7 @@ export interface TrackEventPayload {
 
 export interface EventDocument {
   _id: string;
+  eventId: string;
   eventType: string;
   userId: string;
   sessionId: string;
@@ -58,6 +60,27 @@ export interface EventDocument {
   device: DeviceInfo;
   timestamp: string;
   createdAt: string;
+}
+
+export interface SystemMetrics {
+  totalProcessedJobs: number;
+  totalFailedJobs: number;
+  queueSize: number;
+  queueMaxSize: number;
+  avgProcessingTimeMs: number;
+  activeWorkers: number;
+  updatedAt: string;
+}
+
+export type AlertSeverity = "info" | "warning" | "critical";
+
+export interface AlertDocument {
+  _id: string;
+  type: string;
+  message: string;
+  severity: AlertSeverity;
+  timestamp: string;
+  metadata?: Record<string, unknown>;
 }
 
 // ─── Analytics Types ──────────────────────────────────────────────────────────
@@ -89,8 +112,8 @@ export interface TimeseriesResponse {
 // ─── WebSocket Events ─────────────────────────────────────────────────────────
 
 export interface WSEventPayload {
-  type: "new_event" | "analytics_update";
-  data: EventDocument | AnalyticsSummary;
+  type: "new_event" | "analytics_update" | "metrics_update" | "alert_created";
+  data: EventDocument | AnalyticsSummary | SystemMetrics | AlertDocument;
 }
 
 // ─── API Response Wrappers ────────────────────────────────────────────────────

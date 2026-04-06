@@ -5,6 +5,7 @@ export const EVENT_QUEUE_NAME = "eventQueue";
 
 export type EventIngestJob = {
   payload: {
+    eventId: string;
     eventType: string;
     userId?: string;
     sessionId?: string;
@@ -34,3 +35,15 @@ export function getEventQueue(): Queue<EventIngestJob> {
   return queue;
 }
 
+export async function getEventQueueSize(): Promise<number> {
+  const q = getEventQueue();
+  const counts = await q.getJobCounts(
+    "waiting",
+    "active",
+    "delayed",
+    "paused",
+    "prioritized",
+    "waiting-children"
+  );
+  return Object.values(counts).reduce((sum, n) => sum + (typeof n === "number" ? n : 0), 0);
+}

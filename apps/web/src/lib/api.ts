@@ -3,9 +3,23 @@ import type {
   TimeseriesResponse,
   EventDocument,
   TrackEventPayload,
+  SystemMetrics,
+  AlertDocument,
 } from "@eventstream/config/types";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+
+export class ApiRequestError extends Error {
+  status: number;
+  details?: unknown;
+
+  constructor(message: string, status: number, details?: unknown) {
+    super(message);
+    this.name = "ApiRequestError";
+    this.status = status;
+    this.details = details;
+  }
+}
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
@@ -15,7 +29,7 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   });
   const json = await res.json();
   if (!res.ok || !json.success) {
-    throw new Error(json.error ?? `HTTP ${res.status}`);
+    throw new ApiRequestError(json.error ?? `HTTP ${res.status}`, res.status, json.details);
   }
   return json.data as T;
 }
@@ -55,6 +69,24 @@ export const api = {
     if (opts.limit) params.set("limit", String(opts.limit));
     if (opts.page) params.set("page", String(opts.page));
     return apiFetch(`/api/events?${params}`);
+  },
+
+  getMetrics(): Promise<SystemMetrics> {
+    return apiFetch("/api/metrics");
+  },
+
+  getAlerts(opts: {
+    severity?: "info" | "warning" | "critical";
+    type?: string;
+    limit?: number;
+    page?: number;
+  }): Promise<{ alerts: AlertDocument[]; total: number; page: number; pages: number }> {
+    const params = new URLSearchParams();
+    if (opts.severity) params.set("severity", opts.severity);
+    if (opts.type) params.set("type", opts.type);
+    if (opts.limit) params.set("limit", String(opts.limit));
+    if (opts.page) params.set("page", String(opts.page));
+    return apiFetch(`/api/alerts?${params}`);
   },
 
   trackEvent(payload: TrackEventPayload): Promise<{ jobId: string | number }> {

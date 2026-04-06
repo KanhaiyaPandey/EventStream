@@ -7,6 +7,8 @@ import { EventsTable } from "@/components/EventsTable";
 import { EventSender } from "@/components/EventSender";
 import { ApiDocs } from "@/components/ApiDocs";
 import { DashboardInit } from "@/components/DashboardInit";
+import { SystemMetrics } from "@/components/SystemMetrics";
+import { SystemHealthBanner } from "@/components/SystemHealthBanner";
 
 export default function DashboardPage() {
   return (
@@ -35,6 +37,12 @@ export default function DashboardPage() {
 
         {/* ── Stats row ── */}
         <StatsRow />
+
+        {/* ── System health banner ── */}
+        <SystemHealthBanner />
+
+        {/* ── System metrics ── */}
+        <SystemMetrics />
 
         {/* ── Charts row ── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">

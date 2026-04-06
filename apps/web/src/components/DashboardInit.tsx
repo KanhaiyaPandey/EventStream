@@ -14,7 +14,8 @@ export function DashboardInit() {
   // Establish WebSocket connection
   useSocket();
 
-  const { setSummary, setSummaryLoading, setEvents, setEventTypes, liveFeed } = useDashboardStore();
+  const { setSummary, setSummaryLoading, setEvents, setEventTypes, setMetrics, setAlerts, liveFeed } =
+    useDashboardStore();
 
   useEffect(() => {
     let cancelled = false;
@@ -22,10 +23,12 @@ export function DashboardInit() {
     async function bootstrap() {
       try {
         // Fetch all initial data in parallel
-        const [summary, eventsRes, types] = await Promise.all([
+        const [summary, eventsRes, types, metrics, alertsRes] = await Promise.all([
           api.getSummary(),
           api.getEvents({ limit: 20, page: 1 }),
           api.getEventTypes(),
+          api.getMetrics(),
+          api.getAlerts({ limit: 20, page: 1 }),
         ]);
 
         if (cancelled) return;
@@ -33,6 +36,8 @@ export function DashboardInit() {
         setSummary(summary);
         setEvents(eventsRes.events, eventsRes.total);
         setEventTypes(types);
+        setMetrics(metrics);
+        setAlerts(alertsRes.alerts);
       } catch (err) {
         console.error("Bootstrap failed:", err);
         setSummaryLoading(false);
@@ -41,7 +46,7 @@ export function DashboardInit() {
 
     bootstrap();
     return () => { cancelled = true; };
-  }, [setSummary, setSummaryLoading, setEvents, setEventTypes]);
+  }, [setSummary, setSummaryLoading, setEvents, setEventTypes, setMetrics, setAlerts]);
 
   // When new live events arrive, also refresh the events table (page 1)
   useEffect(() => {

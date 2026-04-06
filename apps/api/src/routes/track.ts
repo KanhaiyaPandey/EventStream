@@ -9,6 +9,7 @@ const router = Router();
 // ─── Validation Schema ────────────────────────────────────────────────────────
 
 const trackSchema = z.object({
+  eventId: z.string().min(1, "eventId is required").max(200).trim(),
   eventType: z
     .string()
     .min(1, "eventType is required")

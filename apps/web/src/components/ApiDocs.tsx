@@ -10,6 +10,7 @@ const SNIPPETS = {
   curl: `curl -X POST ${API_URL}/api/track \\
   -H "Content-Type: application/json" \\
   -d '{
+    "eventId": "evt_$(uuidgen)",
     "eventType": "page_view",
     "userId": "user_123",
     "properties": {
@@ -22,6 +23,7 @@ await fetch("${API_URL}/api/track", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
+    eventId: crypto.randomUUID(),
     eventType: "purchase",
     userId: "user_123",
     properties: { value: 49.99, currency: "USD" }
@@ -30,6 +32,7 @@ await fetch("${API_URL}/api/track", {
   python: `import requests
 
 requests.post("${API_URL}/api/track", json={
+    "eventId": "evt_123",
     "eventType": "sign_up",
     "userId": "user_123",
     "properties": {"plan": "pro"}
@@ -104,6 +107,9 @@ export function ApiDocs() {
               { method: "GET",  path: "/api/events",               desc: "List events (paginated)" },
               { method: "GET",  path: "/api/analytics/summary",    desc: "Dashboard stats" },
               { method: "GET",  path: "/api/analytics/timeseries", desc: "Time-series data" },
+              { method: "GET",  path: "/api/analytics/query",      desc: "SQL-like query (count + group)" },
+              { method: "GET",  path: "/api/metrics",              desc: "System metrics" },
+              { method: "GET",  path: "/api/alerts",               desc: "Persisted alerts" },
             ].map((ep) => (
               <div key={ep.path} className="flex items-center gap-2.5 py-1.5 border-b border-zinc-50 last:border-0">
                 <span className={`text-xs font-mono font-bold w-10 ${

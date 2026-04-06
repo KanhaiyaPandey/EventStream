@@ -1,7 +1,7 @@
 import { Server as HttpServer } from "http";
 import { Server as SocketServer, Socket } from "socket.io";
 import { env } from "../config/env";
-import type { EventDocument, AnalyticsSummary } from "@eventstream/config/types";
+import type { EventDocument, AnalyticsSummary, SystemMetrics, AlertDocument } from "@eventstream/config/types";
 
 let io: SocketServer | null = null;
 
@@ -62,6 +62,16 @@ export function broadcastNewEvent(event: EventDocument): void {
 export function broadcastAnalytics(summary: AnalyticsSummary): void {
   if (!io) return;
   io.emit("analytics_update", summary);
+}
+
+export function broadcastMetrics(metrics: SystemMetrics): void {
+  if (!io) return;
+  io.emit("metrics_update", metrics);
+}
+
+export function broadcastAlertCreated(alert: AlertDocument): void {
+  if (!io) return;
+  io.emit("alert_created", alert);
 }
 
 /**

@@ -1,5 +1,11 @@
 import { create } from "zustand";
-import type { EventDocument, AnalyticsSummary, TimeseriesPoint } from "@eventstream/config/types";
+import type {
+  EventDocument,
+  AnalyticsSummary,
+  TimeseriesPoint,
+  SystemMetrics,
+  AlertDocument,
+} from "@eventstream/config/types";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -42,9 +48,26 @@ interface DashboardStore {
   // Available event types for filters
   eventTypes: string[];
   setEventTypes: (t: string[]) => void;
+
+  // System metrics
+  metrics: SystemMetrics | null;
+  metricsLoading: boolean;
+  metricsHistory: Array<{ time: string; queueSize: number; avgProcessingTimeMs: number }>;
+  systemHealth: "healthy" | "high_load" | "overloaded";
+  overloadNotice: boolean;
+  setMetrics: (m: SystemMetrics) => void;
+  setMetricsLoading: (v: boolean) => void;
+  setOverloadNotice: (v: boolean) => void;
+
+  // Alerts
+  alerts: AlertDocument[];
+  pushAlert: (a: AlertDocument) => void;
+  setAlerts: (a: AlertDocument[]) => void;
 }
 
 const FEED_LIMIT = 100;
+const METRICS_HISTORY_LIMIT = 60;
+const ALERTS_LIMIT = 200;
 
 export const useDashboardStore = create<DashboardStore>((set) => ({
   // Connection
@@ -100,4 +123,38 @@ export const useDashboardStore = create<DashboardStore>((set) => ({
   // Event types
   eventTypes: [],
   setEventTypes: (t) => set({ eventTypes: t }),
+
+  // Metrics
+  metrics: null,
+  metricsLoading: true,
+  metricsHistory: [],
+  systemHealth: "healthy",
+  overloadNotice: false,
+  setMetrics: (m) =>
+    set((state) => {
+      const ratio = m.queueMaxSize > 0 ? m.queueSize / m.queueMaxSize : 0;
+      const systemHealth =
+        ratio >= 1 ? "overloaded" : ratio >= 0.7 ? "high_load" : "healthy";
+
+      const history = [
+        ...state.metricsHistory,
+        {
+          time: new Date(m.updatedAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
+          queueSize: m.queueSize,
+          avgProcessingTimeMs: m.avgProcessingTimeMs,
+        },
+      ].slice(-METRICS_HISTORY_LIMIT);
+
+      return { metrics: m, metricsLoading: false, metricsHistory: history, systemHealth };
+    }),
+  setMetricsLoading: (v) => set({ metricsLoading: v }),
+  setOverloadNotice: (v) => set({ overloadNotice: v }),
+
+  // Alerts
+  alerts: [],
+  pushAlert: (a) =>
+    set((state) => ({
+      alerts: [a, ...state.alerts].slice(0, ALERTS_LIMIT),
+    })),
+  setAlerts: (a) => set({ alerts: a.slice(0, ALERTS_LIMIT) }),
 }));

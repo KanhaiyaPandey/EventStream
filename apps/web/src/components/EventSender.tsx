@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Send, Shuffle } from "lucide-react";
 import { Card, CardHeader, CardContent, Badge } from "@eventstream/ui";
-import { api } from "@/lib/api";
+import { api, ApiRequestError } from "@/lib/api";
+import { useDashboardStore } from "@/store/dashboardStore";
 
 const SAMPLE_EVENTS = [
   { eventType: "page_view",   userId: "user_001", properties: { url: "/dashboard", referrer: "/login" } },
@@ -21,6 +22,7 @@ export function EventSender() {
   const [lastSent, setLastSent] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedIdx, setSelectedIdx] = useState(0);
+  const setOverloadNotice = useDashboardStore((s) => s.setOverloadNotice);
 
   const current = SAMPLE_EVENTS[selectedIdx]!;
 
@@ -29,12 +31,17 @@ export function EventSender() {
     setError(null);
     try {
       const res = await api.trackEvent({
+        eventId: crypto.randomUUID(),
         eventType: current.eventType,
         userId: current.userId,
         properties: current.properties,
       });
       setLastSent(String(res.jobId));
     } catch (err) {
+      if (err instanceof ApiRequestError && err.status === 503) {
+        setOverloadNotice(true);
+        setTimeout(() => setOverloadNotice(false), 8000);
+      }
       setError(err instanceof Error ? err.message : "Failed to send");
     } finally {
       setSending(false);
@@ -54,11 +61,20 @@ export function EventSender() {
       await Promise.all(
         Array.from({ length: 5 }, () => {
           const evt = SAMPLE_EVENTS[Math.floor(Math.random() * SAMPLE_EVENTS.length)]!;
-          return api.trackEvent({ eventType: evt.eventType, userId: evt.userId, properties: evt.properties });
+          return api.trackEvent({
+            eventId: crypto.randomUUID(),
+            eventType: evt.eventType,
+            userId: evt.userId,
+            properties: evt.properties,
+          });
         })
       );
       setLastSent("burst-5");
     } catch (err) {
+      if (err instanceof ApiRequestError && err.status === 503) {
+        setOverloadNotice(true);
+        setTimeout(() => setOverloadNotice(false), 8000);
+      }
       setError(err instanceof Error ? err.message : "Failed");
     } finally {
       setSending(false);
@@ -103,7 +119,12 @@ export function EventSender() {
             <span className="text-zinc-500">/api/track</span>
             {"\n"}
             {JSON.stringify(
-              { eventType: current.eventType, userId: current.userId, properties: current.properties },
+              {
+                eventId: "<uuid>",
+                eventType: current.eventType,
+                userId: current.userId,
+                properties: current.properties,
+              },
               null, 2
             )}
           </div>

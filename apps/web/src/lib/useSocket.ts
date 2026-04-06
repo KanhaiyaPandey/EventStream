@@ -3,13 +3,13 @@
 import { useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 import { useDashboardStore } from "@/store/dashboardStore";
-import type { EventDocument, AnalyticsSummary } from "@eventstream/config/types";
+import type { EventDocument, AnalyticsSummary, SystemMetrics, AlertDocument } from "@eventstream/config/types";
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL ?? "http://localhost:4000";
 
 export function useSocket() {
   const socketRef = useRef<Socket | null>(null);
-  const { setWsConnected, pushEvent, setSummary } = useDashboardStore();
+  const { setWsConnected, pushEvent, setSummary, setMetrics, pushAlert } = useDashboardStore();
 
   useEffect(() => {
     // Only connect on client side
@@ -47,6 +47,14 @@ export function useSocket() {
     // Analytics summary updated → refresh stats cards
     socket.on("analytics_update", (summary: AnalyticsSummary) => {
       setSummary(summary);
+    });
+
+    socket.on("metrics_update", (metrics: SystemMetrics) => {
+      setMetrics(metrics);
+    });
+
+    socket.on("alert_created", (alert: AlertDocument) => {
+      pushAlert(alert);
     });
 
     return () => {
