@@ -1,4 +1,4 @@
-import express from "express";
+import express, { type NextFunction, type Request, type Response } from "express";
 import { createServer } from "http";
 import cors from "cors";
 import helmet from "helmet";
@@ -23,7 +23,7 @@ const httpServer = createServer(app);
 
 // APIs should not be cached by browsers (prevents 304 + stale dashboards)
 app.set("etag", false);
-app.use((_req, res, next) => {
+app.use((_req: Request, res: Response, next: NextFunction) => {
   res.setHeader("Cache-Control", "no-store");
   res.setHeader("Pragma", "no-cache");
   res.setHeader("Expires", "0");
@@ -63,12 +63,12 @@ app.use("/api/metrics", apiLimiter, metricsRouter);
 app.use("/api/alerts", apiLimiter, alertsRouter);
 
 // Health check at root
-app.get("/", (_req, res) => {
+app.get("/", (_req: Request, res: Response) => {
   res.json({ name: "EventStream API", version: "1.0.0", status: "ok" });
 });
 
 // 404 handler
-app.use((_req, res) => {
+app.use((_req: Request, res: Response) => {
   res.status(404).json({ success: false, error: "Route not found" });
 });
 
