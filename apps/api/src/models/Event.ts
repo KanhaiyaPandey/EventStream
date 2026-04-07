@@ -31,7 +31,6 @@ const EventSchema = new Schema<IEvent>(
       trim: true,
       maxlength: 200,
       unique: true,
-      index: true,
     },
     eventType: {
       type: String,
@@ -74,9 +73,6 @@ const EventSchema = new Schema<IEvent>(
 );
 
 // ─── Indexes (performance-critical) ──────────────────────────────────────────
-
-// Strong idempotency key
-EventSchema.index({ eventId: 1 }, { unique: true });
 
 // Most common query: recent events of a specific type
 EventSchema.index({ eventType: 1, timestamp: -1 });
