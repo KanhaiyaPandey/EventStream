@@ -4,6 +4,7 @@ import { Activity } from "lucide-react";
 import { LiveDot } from "@eventstream/ui";
 import { useDashboardStore } from "@/store/dashboardStore";
 import Link from "next/link";
+import { FaGithub } from "react-icons/fa";
 
 export function Navbar() {
   const wsConnected = useDashboardStore((s) => s.wsConnected);
@@ -54,6 +55,15 @@ export function Navbar() {
             connected={wsConnected}
             label={wsConnected ? "Live" : "Offline"}
           />
+          <div>
+            <a
+              href="https://github.com/KanhaiyaPandey/EventStream"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FaGithub className="h-5 w-5 text-zinc-600 hover:text-zinc-900 transition-colors" />
+            </a>
+          </div>
         </div>
       </div>
     </header>
